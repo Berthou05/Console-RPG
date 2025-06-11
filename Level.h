@@ -21,12 +21,17 @@ public:
     Level(const Level &l);
     ~Level();
 
-    bool hasWon();
+    bool hasWon() const;
     void addPrologue(string p);
     void addEpilogue(string e);
     void addEnemy(Character* en);
     void addHero(Character* h);
-    void execute();
+
+    string getName() const;
+    string getPrologue() const;
+    string getEpilogue() const;
+    Character* getEnemy() const;
+    Character* getHero() const;
 };
 
 Level::Level(): name(""), prologue(""), epilogue(""), enemy(nullptr), won(false) {}
@@ -37,7 +42,27 @@ Level::Level(const Level &l)
 
 Level::~Level() {}
 
-bool Level::hasWon() {
+string Level::getName() const {
+    return name;
+}
+
+string Level::getPrologue() const {
+    return prologue;
+}
+
+string Level::getEpilogue() const {
+    return epilogue;
+}
+
+Character* Level::getEnemy() const {
+    return enemy;
+}
+
+Character* Level::getHero() const {
+    return hero;
+}
+
+bool Level::hasWon() const {
     if (won){
         return true;
     } else {
@@ -60,26 +85,6 @@ void Level::addEnemy(Character* en) {
 void Level::addHero(Character* h) {
     hero = h;
 }
-
-void Level::execute() {
-    bool running = true;
-    string log ;
-    cout << name << endl;
-    cout << prologue << endl;
-
-    while (hero->isAlive() && enemy->isAlive() && running) {
-        
-        if (!hero->isAlive()) {
-            log = "You have been defeated";
-        } else if (!enemy->isAlive()) {
-            log = "Victory!";
-        }
-    }
-}
-
-
-
-
 
 #endif
 
