@@ -196,17 +196,16 @@ Warrior::Warrior(string n) : Character(n, 80, 30, 40, 20) {}
 
 void Warrior::attack(Character* target) {
     if (isAlive() && target != nullptr && target->isAlive()) {
-        cout << getName() << " attacks " << target->getName() << " with a sword!" << endl;
-        if (getMana() >= 10) {
-            target->takeDamage(getStrength() + 10);
-            cout << getName() << " deals " << getStrength()*2 << " damage at a cost of 10 mana!\n";
+        if (mana >= 10) {
+            target->takeDamage(strength * 2);
+            cout << name << " deals " << strength * 2 << " damage at a cost of 10 mana!\n";
             mana -= 10;
         } else {
-            target->takeDamage(getStrength());
-            cout << getName() << " deals " << getStrength() << " damage!\n";
+            target->takeDamage(strength);
+            cout << name << " deals " << strength << " damage!\n";
         }
     } else {
-        cout << getName() << " cannot attack!" << endl;
+        cout << name << " cannot attack, they or the target are dead!" << endl;
     }
 }
 
@@ -236,11 +235,11 @@ void Warrior::recover() {
 
 string Warrior::toString() const {
     stringstream ss;
-    ss << "Warrior: " << getName() << "\n"
-       << "Health: " << getHealth() << "\n"
-       << "Mana: " << getMana() << "\n"
-       << "Strength: " << getStrength() << "\n"
-       << "Shield: " << getShield() << "\n";
+    ss << getName() << "\t Character Stats: "
+       << "\t/\t HEALTH: " << getHealth()
+       << "\t/\t MANA: " << getMana()
+       << "\t/\t STRENGTH: " << getStrength()
+       << "\t/\t SHIELD: " << getShield();
     return ss.str();
 }
 
@@ -290,17 +289,16 @@ Archer::Archer(string n) : Character(n, 60, 50, 30, 15) {}
 
 void Archer::attack(Character* target) {
     if (isAlive() && target != nullptr && target->isAlive()) {
-        cout << getName() << " attacks " << target->getName() << " with a bow!" << endl;
-        if (getMana() >= 20) {
-            target->takeDamage(getStrength() + 15);
-            cout << getName() << " deals " << getStrength()*2 << " damage at a cost of 20 mana!\n";
+        if (mana >= 20) {
+            target->takeDamage(strength*2);
+            cout << name << " deals " << strength*2 << " damage at a cost of 20 mana!\n";
             mana -= 20;
         } else {
-            target->takeDamage(getStrength());
-            cout << getName() << " deals " << getStrength() << " damage!\n";
+            target->takeDamage(strength);
+            cout << name << " deals " << strength << " damage!\n";
         }
     } else {
-        cout << getName() << " cannot attack!" << endl;
+        cout << name << " cannot attack, they or the target are dead!" << endl;
     }
 }
 
@@ -330,11 +328,11 @@ void Archer::recover() {
 
 string Archer::toString() const {
     stringstream ss;
-    ss << "Archer: " << getName() << "\n"
-       << "Health: " << getHealth() << "\n"
-       << "Mana: " << getMana() << "\n"
-       << "Strength: " << getStrength() << "\n"
-       << "Shield: " << getShield() << "\n";
+    ss << getName() << "\t Character Stats: "
+       << "\t/\t HEALTH: " << getHealth()
+       << "\t/\t MANA: " << getMana()
+       << "\t/\t STRENGTH: " << getStrength()
+       << "\t/\t SHIELD: " << getShield();
     return ss.str();
 }
 
@@ -384,17 +382,16 @@ Mage::Mage(string n) : Character(n, 60, 100, 20, 10) {}
 
 void Mage::attack(Character* target) {
     if (isAlive() && target != nullptr && target->isAlive()) {
-        cout << getName() << " attacks " << target->getName() << " with a spell!" << endl;
-        if (getMana() >= 30) {
-            target->takeDamage(getStrength() + 20);
-            cout << getName() << " deals " << getStrength()*2 << " damage at a cost of 30 mana!\n";
+        if (mana >= 30) {
+            target->takeDamage(strength * 2);
+            cout << name << " deals " << strength * 2 << " damage at a cost of 30 mana!\n";
             mana -= 30;
         } else {
-            target->takeDamage(getStrength());
-            cout << getName() << " deals " << getStrength() << " damage!\n";
+            target->takeDamage(strength);
+            cout << name << " deals " << strength << " damage!\n";
         }
     } else {
-        cout << getName() << " cannot attack!" << endl;
+        cout << name << " cannot attack, they or the target are dead!" << endl;
     }
 }
 
@@ -424,11 +421,11 @@ void Mage::recover() {
 
 string Mage::toString() const {
     stringstream ss;
-    ss << "Mage: " << getName() << "\n"
-       << "Health: " << getHealth() << "\n"
-       << "Mana: " << getMana() << "\n"
-       << "Strength: " << getStrength() << "\n"
-       << "Shield: " << getShield() << "\n";
+    ss << getName() << "\t Character Stats: "
+       << "\t/\t HEALTH: " << getHealth()
+       << "\t/\t MANA: " << getMana()
+       << "\t/\t STRENGTH: " << getStrength()
+       << "\t/\t SHIELD: " << getShield();
     return ss.str();
 }
 
@@ -511,11 +508,11 @@ void Enemy::recover() {
 
 string Enemy::toString() const {
     stringstream ss;
-    ss << "Enemy: " << getName() << "\n"
-       << "Health: " << getHealth() << "\n"
-       << "Mana: " << getMana() << "\n"
-       << "Strength: " << getStrength() << "\n"
-       << "Shield: " << getShield() << "\n";
+    ss << getName() << "\t Character Stats: "
+       << "\t/\t HEALTH: " << getHealth()
+       << "\t/\t MANA: " << getMana()
+       << "\t/\t STRENGTH: " << getStrength()
+       << "\t/\t SHIELD: " << getShield();
     return ss.str();
 }
 
