@@ -28,6 +28,7 @@ class UI {
 private:
     static void drawFrame();
     static void printCentered(int row, const string& text);
+    static void printCenteredTitle(int row, const string& text);
     static void printBlock(int startRow, int startCol, const vector<string>& block);
     static void printCenteredBlock(int startRow, const vector<string>& block);
     static const vector<string> gameName;
@@ -36,6 +37,8 @@ public:
     static void init();
     static void shutdown();
     static void clearScreen();
+
+    static void printBattleCard(const Character* character, int row, int col);
     
     static Scene showMainMenu();
     static Character* showCharacterSelector(const vector<Character*>& heroes);
@@ -105,6 +108,19 @@ vector<string> gameOverArt = {
     "             ..             ..    .              .            ..   ..             ..  ..          .                 ..    ..      .               "
 };
 
+vector<string> battleCardFrame = {
+    "  +-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+",
+    "  !                                !",
+    "  +-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+",
+    "  |                                |",
+    "  !                                !",
+    "  |                                |",
+    "  !                                !",
+    "  |                                |",
+    "  !                                !",
+    "  |                                |",
+    "  +-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+"
+};
 
 void UI::clearScreen() {
     erase();
@@ -115,14 +131,14 @@ void UI::drawFrame() {
 
     //TOP BORDER
     for (int x = 2; x < COLS - 2; ++x) {
-    char c = (x % 2 == 0) ? '~' : '-';
-    mvaddch(1, x, c);
+        char c = (x % 2 == 0) ? '~' : '-';
+        mvaddch(1, x, c);
     }
 
     // First horiztal border
     for (int x = 2; x < COLS - 2; ++x) {
-    char c = (x % 2 == 0) ? '~' : '-';
-    mvaddch(33, x, c);
+        char c = (x % 2 == 0) ? '~' : '-';
+        mvaddch(33, x, c);
     }
 
     // Bottom border
@@ -153,7 +169,57 @@ void UI::drawFrame() {
     refresh();
 }
 
+void UI::printBattleCard(const Character* character, int tableStartRow, int tableStartCol) {
+    if (!character) return;
+
+    // Draw the card frame
+    printBlock(tableStartRow, tableStartCol, battleCardFrame);
+    // Print Name
+    mvprintw(tableStartRow + 1, tableStartCol + 4, "%s", character->getName().c_str());
+    
+    // Print Health Bar
+    float healthPercent = character->getHealthPercent();
+    mvprintw(tableStartRow + 3, tableStartCol + 4, "Health:  [");
+    if (healthPercent > 0.3) {
+        attron(COLOR_PAIR(3)); // Green for health
+    } else if (healthPercent > 0) {
+        attron(COLOR_PAIR(2)); // Red for low health
+    }
+    for (int i = 0; i < int(20 * healthPercent); ++i) {
+        mvaddch(tableStartRow + 3, tableStartCol + 14 + i, '#');
+    }
+    mvprintw(tableStartRow + 3, tableStartCol + 23, "%i", character->getHealth());
+    if (character->isAlive()) {
+        attron(COLOR_PAIR(1)); // Reset color
+    } else {
+        attron(COLOR_PAIR(2)); // Red
+    }
+    mvprintw(tableStartRow + 3, tableStartCol + 34, "]");
+    attron(COLOR_PAIR(1)); // Reset color
+
+    // Print Mana Bar
+    float manaPercent = character->getManaPercent();
+    mvprintw(tableStartRow + 4, tableStartCol + 4, "Mana:    [");
+    attron(COLOR_PAIR(4)); // Blue for mana
+    for (int i = 0; i < int(20 * manaPercent); ++i) {
+        mvaddch(tableStartRow + 4, tableStartCol + 14 + i, '#');
+    }
+    mvprintw(tableStartRow + 4, tableStartCol + 23, "%i", character->getMana());
+    attron(COLOR_PAIR(1)); // Reset color
+    mvprintw(tableStartRow + 4, tableStartCol + 34, "]");
+
+    // Print Strength and Shield
+    mvprintw(tableStartRow + 5, tableStartCol + 4, "Strength: %d", character->getStrength());
+    mvprintw(tableStartRow + 6, tableStartCol + 4, "Shield:   %d", character->getShield());
+}
+
 void UI::printCentered(int row, const string& text) {
+    mvprintw(row, 4, "%s", string(COLS - 4, ' ').c_str()); // Clear the line
+    int col = (COLS - text.length()) / 2;
+    mvprintw(row, col, "%s", text.c_str());
+}
+
+void UI::printCenteredTitle(int row, const string& text) {
     int col = (COLS - text.length()) / 2;
     mvprintw(row, col, "%s", text.c_str());
 }
@@ -173,12 +239,12 @@ void UI::printCenteredBlock(int startRow, const vector<string>& block) {
 
 
 void UI::init() {
-    initscr();            // Initialize ncurses
-    cbreak();             // Disable line buffering
-    noecho();             // Don't echo input characters
+    initscr(); // Initialize ncurses
+    cbreak(); // Disable line buffering
+    noecho(); // Don't echo input characters
     keypad(stdscr, TRUE); // Enable function keys
-    curs_set(0);          // Hide the cursor
-    start_color();        // Start color functionality
+    curs_set(0); // Hide the cursor
+    start_color(); // Start color functionality
     init_pair(1, COLOR_WHITE, COLOR_BLACK); // Default color pair
     init_pair(2, COLOR_RED, COLOR_BLACK); // Red color pair
     init_pair(3, COLOR_GREEN, COLOR_BLACK); // Green color pair
@@ -194,7 +260,7 @@ void UI::shutdown() {
 Scene UI::showMainMenu() {
     clearScreen();
     drawFrame();
-    printCentered(1, "Welcome to the Game!");
+    printCenteredTitle(1, "Welcome to the Game!");
     printCenteredBlock(3, UI::gameName);
     printCenteredBlock(10, UI::SkullArt);
     
@@ -217,14 +283,18 @@ Character* UI::showCharacterSelector(const vector<Character*>& heroes) {
     clearScreen();
     drawFrame();
 
-    printCentered(1, "Character Selection!");
+    printCenteredTitle(1, "Character Selection!");
     printCentered(5, "Choose your character:");
 
     
     for (int i = 0; i < heroes.size(); ++i) {
         Character* h = heroes[i];
         int y = 10 + i;
+        if (!h->isAlive()) {
+            attron(COLOR_PAIR(2));
+        } 
         mvprintw(y, 10, "%d) %s", i + 1, h->toString().c_str());
+        attron(COLOR_PAIR(1));
     }
 
     int optionCount = heroes.size();
@@ -234,29 +304,34 @@ Character* UI::showCharacterSelector(const vector<Character*>& heroes) {
     }
 
     mvprintw(10 + optionCount + 1, 10, "Enter your choice: ");
-    int choice;
-    while (choice < '1' || choice > '0'  + optionCount ) {
-        choice = getch();
-        if (choice < '1' || choice > '0' + optionCount) {
-            printCentered(36, "Invalid choice, please try again.");
+    while (true) {
+        int key = getch();
+        if (key == '0') {
+            return nullptr;
         }
-    }
-    choice -= '1';
-    if (choice >= 0 && choice < heroes.size()) {
-        return heroes[choice];
-    } else if (choice == heroes.size() && heroes.size() < 5) {
-        return nullptr;
-    } else {
-        printCentered(36, "Invalid choice, please try again.");
-        return nullptr;
-    }
+        int choice = key - '1';
+        if (choice >= 0 && choice < (int)heroes.size()) {
+            if (heroes[choice]->isAlive()) {
+                return heroes[choice];
+            } else {
+                printCentered(36, "This character is not alive, please choose another.");
+                getch();
+            }
+        } else if (choice == heroes.size() && heroes.size() < 5) {
+            // Create character option
+            return (Character*)-1;
+        } else {
+            printCentered(36, "Invalid choice, please try again.");
+            getch();
+        }
+    } 
 }
 
 Character* UI::showCharacterCreator() {
     clearScreen();
     drawFrame();
 
-    printCentered(1, "Character Creation");
+    printCenteredTitle(1, "Character Creation");
     printCentered(6, "Enter your character's name: ");
     printCentered(7, "");
 
@@ -288,7 +363,7 @@ Character* UI::showCharacterCreator() {
             return nullptr;
     }
 
-    printCentered(16, "Character created successfully!");
+    printCentered(36, "Character created successfully!");
     getch();
 
     return newHero;
@@ -298,23 +373,26 @@ Level* UI::showLevelSelector(const vector<Level*>& levels) {
     clearScreen();
     drawFrame();
 
-    printCentered(1, "Level Selection");
+    printCenteredTitle(1, "Level Selection");
     printCentered(5, "Choose a level:");
     for (size_t i = 0; i < levels.size(); ++i) {
         std::string status = levels[i]->hasWon() ? "Completed" : "Not Completed";
         std::string line = std::to_string(i + 1) + ") " + levels[i]->getName() + "\t\tStatus: " + status;
         mvprintw(10 + i, 10, "%s", line.c_str());
     }
+    mvprintw(36, 10, "[0] Back to Main Menu");
     mvprintw(10 + levels.size(), 10, "Enter your choice: ");
-    char input[8] = {0};
-    int key = getch();
-    int index = key - '1';
-
-    if (index >= 0 && index < (int)levels.size()) {
-        return levels[index];
-    } else {
-        printCentered(36, "Invalid choice, please try again.");
-        return nullptr;
+    while (true){
+        int key = getch();
+        if (key == '0') {
+            return nullptr; // Back to main menu
+        } 
+        int index = key - '1';
+        if (index >= 0 || index < (int)levels.size()) {
+            return levels[index];
+        } else {
+            printCentered(36, "Invalid choice, please try again.");
+        }
     }
 }
 
@@ -322,30 +400,36 @@ bool UI::showBattleScreen(const Level* level) {
     clearScreen();
     drawFrame();
 
-    printCentered(1, "Battle Screen");
+    printCenteredTitle(1, "Battle Screen");
     printCentered(3, level->getName());
     printCentered(5, level->getPrologue());
     
 
     mvprintw(36, 10, "[1] Attack");
-    mvprintw(37, 10, "[2] recover");
+    mvprintw(37, 10, "[2] Recover");
     mvprintw(38, 10, "[3] Exit");
     
     while (true) {
-        if (!(level->getHero() == nullptr || level->getEnemy() == nullptr)) {
-            mvprintw(7, 10, "%s", level->getHero()->toString().c_str());
-            mvprintw(9, 10, "%s", level->getEnemy()->toString().c_str());    
-        } else { return false; }
-
+        printBattleCard(level->getHero(), 10, COLS / 5 - 4);
+        printBattleCard(level->getEnemy(), 10, COLS / 5 * 3 - 3);
         int choice = getch();
 
         switch (choice) {
             case '1':
+                //heroes attack cicle
                 level->getHero()->attack(level->getEnemy());
+                if ((level->getEnemy()->getShield()) > (level->getHero()->getStrength())) {
+                    printCentered(28, "Your attack was absorbed by the enemy's shield!");
+                } else {
+                    printCentered(28, "You have attacked the enemy and dealt " + std::to_string(level->getHero()->getStrength()) + " damage!");
+                }
+                if (level->getEnemy()->isAlive()) printCentered(29, "It is now the enemy's turn");
+                printCentered(30, "Press any key to continue...");
                 break;
             case '2':
                 level->getHero()->recover();
-                printCentered(30, "You have recovered some health and mana.");
+                printCentered(28, "You have recovered some health and mana.");
+                printCentered(30, "Press any key to continue...");
                 break;
             case '3':
                 printCentered(10, "Exiting battle...");
@@ -357,31 +441,53 @@ bool UI::showBattleScreen(const Level* level) {
                 continue;
         }
 
+        // Reprint the battle cards
+        printBattleCard(level->getHero(), 10, COLS / 5 - 4);
+        printBattleCard(level->getEnemy(), 10, COLS / 5 * 3 - 3);
+
         if (level->getEnemy()->isAlive()) {
+            getch();
+
+            //enemies attack cicle
             level->getEnemy()->attack(level->getHero());
-            printCentered(30, "The enemy has attacked you!");
+            int damage = level->getEnemy()->getStrength() - level->getHero()->getShield();
+            if (damage <= 0) {
+                printCentered(28, "The enemy has attacked you but your shield absorbed the attack!");
+            } else {
+                printCentered(28, "The enemy has attacked you and dealt " + std::to_string(damage) + " damage!");
+            }
+            printCentered(29, "It is now your turn");
+            printCentered(30, "Select your next action...");
             if (!level->getHero()->isAlive()) {
-                printCentered(10, "You have been defeated!");
-                printCentered(30, level->getEnemy()->getName() + " has won the battle.");
+                printCentered(24, "You have been defeated!");
+                printCentered(28, level->getEnemy()->getName() + " has won the battle.");
+                printCentered(29, level->getHero()->getName() + " is now dead!");
+                printCentered(30, "Press any key to continue...");
                 getch();
                 return false;
                 break;
             }
         } else {
-            printCentered(10, "You have defeated the enemy!");
-            printCentered(30, level->getEpilogue());
-            level->hasWon();
+            printCentered(24, "You have defeated the enemy!");
+            printCentered(28, level->getEpilogue());
+            printCentered(29, "You have won the battle!");
+            printCentered(30, "Press any key to continue...");
+            printBattleCard(level->getHero(), 10, COLS / 5 - 4);
+            attron(COLOR_PAIR(2));
+            printBattleCard(level->getEnemy(), 10, COLS / 5 * 3 - 3);
+            attroff(COLOR_PAIR(1));
             getch();
             return true;
         }
     }
 }
 
+
 Scene UI::showGameOver() {
     clearScreen();
     attron(COLOR_PAIR(2));
     drawFrame();
-    printCentered(1, "You have been defeated.");
+    printCenteredTitle(1, "You have been defeated.");
     printCenteredBlock(8, gameOverArt);
     printCentered(35, "Press any key to return to the main menu...");
     getch();

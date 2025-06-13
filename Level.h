@@ -22,6 +22,7 @@ public:
     ~Level();
 
     bool hasWon() const;
+    void setWon(bool w);
     void addPrologue(string p);
     void addEpilogue(string e);
     void addEnemy(Character* en);
@@ -68,6 +69,10 @@ bool Level::hasWon() const {
     } else {
         return false;
     }
+}
+
+void Level::setWon(bool w) {
+    won = w;
 }
 
 void Level::addPrologue(string p) {

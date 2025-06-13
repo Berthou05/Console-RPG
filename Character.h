@@ -28,7 +28,7 @@ using namespace std;
 class Character {
 protected:
     string name;
-    int health, mana, strength, shield;
+    int health, mana, strength, shield, maxHealth, maxMana;
 
 public:
     Character();
@@ -47,6 +47,9 @@ public:
     bool isAlive() const;
     void takeDamage(int damage);
     void consumeMana(int amount);
+
+    virtual float getHealthPercent() const = 0;
+    virtual float getManaPercent() const = 0;
 
     virtual void attack(Character* target) = 0;
     virtual void recover() = 0;
@@ -79,7 +82,7 @@ Character::Character(const Character &c)
 // =================================================================
 
 Character::Character(string n, int h, int m, int s, int d)
-    : name(n), health(h), mana(m), strength(s), shield(d) {}
+    : name(n), health(h), mana(m), strength(s), shield(d), maxHealth(h), maxMana(m) {}
 
 
 // =================================================================
@@ -164,19 +167,33 @@ public:
     void attack(Character* target) override;
     void recover() override;
     string toString() const override;
+    float getHealthPercent() const override;
+    float getManaPercent() const override;
+
 };
 
 // =================================================================
 // Default constructor for Warrior
 // =================================================================
 
-Warrior::Warrior() : Character("Warrior", 80, 30, 40, 20) {}
+Warrior::Warrior() : Character("Warrior", 80, 30, 40, 20) {
+    maxHealth = 80;
+    maxMana = 30;
+}
 
 // =================================================================
 // Copy constructor for Warrior
 // =================================================================
 
-Warrior::Warrior(const Warrior &w): Character(w) {}
+Warrior::Warrior(const Warrior &w): Character(w) {
+    maxHealth = w.maxHealth;
+    maxMana = w.maxMana;
+    health = w.health;
+    mana = w.mana;
+    strength = w.strength;
+    shield = w.shield;
+    name = w.name;
+}
 
 // =================================================================
 // Parameterized constructor for Warrior
@@ -184,7 +201,10 @@ Warrior::Warrior(const Warrior &w): Character(w) {}
 // @param n The name of the warrior
 // =================================================================
 
-Warrior::Warrior(string n) : Character(n, 80, 30, 40, 20) {}
+Warrior::Warrior(string n) : Character(n, 80, 30, 40, 20) {
+    maxHealth = 80;
+    maxMana = 30;
+}
 
 // =================================================================
 // Warrior attacks the target character
@@ -201,6 +221,7 @@ void Warrior::attack(Character* target) {
             mana -= 10;
         } else {
             target->takeDamage(strength);
+            mana += 5;
         }
     }
 }
@@ -211,13 +232,13 @@ void Warrior::attack(Character* target) {
 
 void Warrior::recover() {
     if (isAlive()) {
-        if (health < 80) {
+        if (health < maxHealth) {
             health += 20;
-            if (health > 80) health = 80;
+            if (health > maxHealth) health = maxHealth;
         }
-        if (mana < 30) {
+        if (mana < maxMana) {
             mana += 10;
-            if (mana > 30) mana = 30;
+            if (mana > maxMana) mana = maxMana;
         }
     }
 }
@@ -237,8 +258,36 @@ string Warrior::toString() const {
 }
 
 // =================================================================
-// Archer class inherits from Character
+// Returns the health percentage of the character. Warrior ?/80
+//
+// @param healthPercent The health percentage to be set
 // =================================================================
+
+float Warrior::getHealthPercent() const {
+    if (health > 0) {
+        float healthPercent = float(health) / maxHealth;
+        return healthPercent;
+    } else {
+        float healthPercent = 0;
+        return healthPercent;
+    }
+}
+
+// =================================================================
+// Returns the mana percentage of the character. Warrior ?/30
+//
+// @param manaPercent The mana percentage to be set
+// =================================================================
+
+float Warrior::getManaPercent() const {
+    if (mana > 0) {
+        float manaPercent = float(mana) / maxMana;
+        return manaPercent;
+    } else {
+        float manaPercent = 0;
+        return manaPercent;
+    }
+}
 
 class Archer : public Character {
 public:
@@ -249,13 +298,19 @@ public:
     void attack(Character* target) override;
     void recover() override;
     string toString() const override;
+    float getHealthPercent() const override;
+    float getManaPercent() const override;
+
 };
 
 // =================================================================
 // Default constructor for Archer
 // =================================================================
 
-Archer::Archer() : Character("Archer", 60, 50, 30, 15) {}
+Archer::Archer() : Character("Archer", 60, 50, 30, 15) {
+    maxHealth = 60;
+    maxMana = 50;
+}
 
 // =================================================================
 // Copy constructor for Archer
@@ -271,7 +326,10 @@ Archer::Archer(const Archer &a) : Character(a) {}
 // @param n The name of the archer
 // =================================================================
 
-Archer::Archer(string n) : Character(n, 60, 50, 30, 15) {}
+Archer::Archer(string n) : Character(n, 60, 50, 30, 15) {
+    maxHealth = 60;
+    maxMana = 50;
+}
 
 // =================================================================
 // Archer attacks the target character
@@ -287,6 +345,9 @@ void Archer::attack(Character* target) {
             mana -= 20;
         } else {
             target->takeDamage(strength);
+            if (mana < maxMana) {
+                mana += 10;
+            }
         }
     }
 }
@@ -297,13 +358,13 @@ void Archer::attack(Character* target) {
 
 void Archer::recover() {
     if (isAlive()) {
-        if (health < 60) {
+        if (health < maxHealth) {
             health += 15;
-            if (health > 60) health = 60;
+            if (health > maxHealth) health = maxHealth;
         }
-        if (mana < 50) {
+        if (mana < maxMana) {
             mana += 10;
-            if (mana > 50) mana = 50;
+            if (mana > maxMana) mana = maxMana;
         }
     }
 }
@@ -323,6 +384,38 @@ string Archer::toString() const {
 }
 
 // =================================================================
+// Returns the health percentage of the character. Archer ?/60
+//
+// @param healthPercent The health percentage to be set
+// =================================================================
+
+float Archer::getHealthPercent() const {
+    if (health > 0) {
+        float healthPercent = float(health) / maxHealth;
+        return healthPercent;
+    } else {
+        float healthPercent = 0;
+        return healthPercent;
+    }
+}
+
+// =================================================================
+// Returns the mana percentage of the character. Archer ?/50
+//
+// @param manaPercent The mana percentage to be set
+// =================================================================
+
+float Archer::getManaPercent() const {
+    if (mana > 0) {
+        float manaPercent = float(mana) / maxMana;
+        return manaPercent;
+    } else {
+        float manaPercent = 0;
+        return manaPercent;
+    }
+}
+
+// =================================================================
 // Mage class inherits from Character
 // =================================================================
 
@@ -335,13 +428,19 @@ public:
     void attack(Character* target) override;
     void recover() override;
     string toString() const override;
+    float getHealthPercent() const override;
+    float getManaPercent() const override;
+
 };
 
 // =================================================================
 // Default constructor for Mage
 // =================================================================
 
-Mage::Mage() : Character("Mage", 65, 100, 20, 10) {}
+Mage::Mage() : Character("Mage", 65, 100, 20, 10) {
+    maxHealth = 65;
+    maxMana = 100;
+}
 
 // =================================================================
 // Copy constructor for Mage
@@ -357,7 +456,10 @@ Mage::Mage(const Mage &m) : Character(m) {}
 // @param n The name of the mage
 // =================================================================
 
-Mage::Mage(string n) : Character(n, 60, 100, 20, 10) {}
+Mage::Mage(string n) : Character(n, 60, 100, 20, 10) {
+    maxHealth = 65;
+    maxMana = 100;
+}
 
 // =================================================================
 // Mage attacks the target character
@@ -373,6 +475,9 @@ void Mage::attack(Character* target) {
             mana -= 30;
         } else {
             target->takeDamage(strength);
+            if (mana < maxMana) {
+                mana += 10;
+            }
         }
     }
 }
@@ -383,13 +488,13 @@ void Mage::attack(Character* target) {
 
 void Mage::recover() {
     if (isAlive()) {
-        if (health < 65) {
+        if (health < maxHealth) {
             health += 10;
-            if (health > 65) health = 65;
+            if (health > maxHealth) health = maxHealth;
         }
-        if (mana < 100) {
+        if (mana < maxMana) {
             mana += 20;
-            if (mana > 100) mana = 100;
+            if (mana > maxMana) mana = maxMana;
         }
     } 
 }
@@ -409,6 +514,38 @@ string Mage::toString() const {
 }
 
 // =================================================================
+// Returns the health percentage of the character. Mage ?/65
+//
+// @param healthPercent The health percentage to be set
+// =================================================================
+
+float Mage::getHealthPercent() const {
+    if (health > 0) {
+        float healthPercent = float(health) / maxHealth;
+        return healthPercent;
+    } else {
+        float healthPercent = 0;
+        return healthPercent;
+    }
+}
+
+// =================================================================
+// Returns the mana percentage of the character. Mage ?/100
+//
+// @param manaPercent The mana percentage to be set
+// =================================================================
+
+float Mage::getManaPercent() const {
+    if (mana > 0) {
+        float manaPercent = float(mana) / maxMana;
+        return manaPercent;
+    } else {
+        float manaPercent = 0;
+        return manaPercent;
+    }
+}
+
+// =================================================================
 // Enemy class inherits from Character
 // =================================================================
 
@@ -421,13 +558,18 @@ public:
     void attack(Character* target) override;
     void recover() override;
     string toString() const override;
+    float getHealthPercent() const override;
+    float getManaPercent() const override;
 };
 
 // =================================================================
 // Default constructor for Enemy
 // =================================================================
 
-Enemy::Enemy() : Character("Enemy", 30, 0, 15, 5) {}
+Enemy::Enemy() : Character("Enemy", 30, 0, 15, 5) {
+    maxHealth = 30;
+    maxMana = 0;;
+}
 
 // =================================================================
 // Copy constructor for Enemy
@@ -446,8 +588,10 @@ Enemy::Enemy(const Enemy &e) : Character(e) {}
 // @param d The shield of the enemy
 // ==================================================================
 
-Enemy::Enemy(string n, int h, int m, int s, int d) 
-    : Character(n, h, m, s, d) {}
+Enemy::Enemy(string n, int h, int m, int s, int d) : Character(n, h, m, s, d) {
+    maxHealth = h;
+    maxMana = m;
+}
 
 // =================================================================
 // Enemy attacks the target character
@@ -465,9 +609,13 @@ void Enemy::attack(Character* target) {
 
 void Enemy::recover() {
     if (isAlive()) {
-        if (health < 30) {
-            health += 20;
-            if (health > 30) health = 30;
+        if (health < maxHealth) {
+            health += 5;
+            if (health > maxHealth) health = maxHealth;
+        }
+        if (mana < maxMana) {
+            mana += 5;
+            if (mana > maxMana) mana = maxMana;
         }
     } 
 }
@@ -484,6 +632,38 @@ string Enemy::toString() const {
        << "\t/\t STRENGTH: " << getStrength()
        << "\t/\t SHIELD: " << getShield();
     return ss.str();
+}
+
+// =================================================================
+// Returns the health percentage of the character. Enemy ?/maxHealth
+//
+// @param healthPercent The health percentage to be set
+// =================================================================
+
+float Enemy::getHealthPercent() const {
+    if (health > 0) {
+        float healthPercent = float(health) / maxHealth;
+        return healthPercent;
+    } else {
+        float healthPercent = 0;
+        return healthPercent;
+    }
+}
+
+// =================================================================
+// Returns the mana percentage of the character. Enemy ?/maxMana
+//
+// @param manaPercent The mana percentage to be set
+// =================================================================
+
+float Enemy::getManaPercent() const {
+    if (mana > 0) {
+        float manaPercent = float(mana) / maxMana;
+        return manaPercent;
+    } else {
+        float manaPercent = 0;
+        return manaPercent;
+    }
 }
 
 #endif

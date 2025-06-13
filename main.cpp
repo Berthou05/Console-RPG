@@ -45,12 +45,15 @@ int main() {
                 break;
             case Scene::CharacterSelector: {
                 Character* selectedHero = UI::showCharacterSelector(heroes);
-                if (selectedHero) {
+                if (selectedHero == (Character*)-1) {
+                    currentScene = Scene::CharacterCreator;
+                    break;
+                } else if (selectedHero) {
                     player = selectedHero;
                     currentScene = Scene::LevelSelect;
                     break;
                 } else {
-                    currentScene = Scene::CharacterCreator;
+                    currentScene = Scene::MainMenu;
                     break;
                 }
             }
@@ -82,7 +85,7 @@ int main() {
                     bool battleResult = UI::showBattleScreen(currentLevel);
                     if (battleResult) {
                         currentScene = Scene::LevelSelect;
-                        currentLevel->hasWon();
+                        currentLevel->setWon(true);
                     } else if (!player->isAlive()) {
                         currentScene = Scene::GameOver;
                     } else {
