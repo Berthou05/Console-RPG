@@ -1,6 +1,10 @@
+//===============================================================
+// 
+
 #include "Level.h"
 #include "Character.h"
 #include "ui.h"
+#include "SaveManager.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -36,6 +40,8 @@ void createLevels() {
 
 int main() {
     createLevels();
+    SaveManager::loadGame(heroes, levels, "save.dat");
+
     UI::init();
     Scene currentScene = Scene::MainMenu;
     while (currentScene != Scene::Exit) {
@@ -95,15 +101,30 @@ int main() {
                     cout << "No character selected!" << endl;
                     currentScene = Scene::MainMenu;
                 }
+                if (battleResult) {
+                    SaveManager::saveGame(heroes, levels, "save.dat");
+                }
                 break;
             }
             case Scene::GameOver: {
                 currentScene = UI::showGameOver();
                 break;
             }
-            
+            case Scene::Options: {
+                currentScene = UI::Options(vector<Character*>& heroes, vectors<Level*>& levels);
+                break;
+            }
         }
-    }    
+    }
+
+    // Cleanup before exiting
+    SaveManager::saveGame(heroes, levels, "save.dat");
+    for (Character* hero : heroes) {
+        delete hero;
+    }
+    for (Level* level : levels) {
+        delete level;
+    }
     UI::shutdown();
     return 0;
 }

@@ -185,15 +185,7 @@ Warrior::Warrior() : Character("Warrior", 80, 30, 40, 20) {
 // Copy constructor for Warrior
 // =================================================================
 
-Warrior::Warrior(const Warrior &w): Character(w) {
-    maxHealth = w.maxHealth;
-    maxMana = w.maxMana;
-    health = w.health;
-    mana = w.mana;
-    strength = w.strength;
-    shield = w.shield;
-    name = w.name;
-}
+Warrior::Warrior(const Warrior &w): Character(w) {}
 
 // =================================================================
 // Parameterized constructor for Warrior
