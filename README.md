@@ -2,10 +2,7 @@
 
 This is a turn-based RPG battle game developed in C++ as part of the Object-Oriented Programming (POO) course at Tecnológico de Monterrey. The game includes character creation, level selection, permadeath mechanics, and a UI powered by `ncurses`.
 
---- 
-
 ## Building the project
----
 ### Dependencies
 - C++17 or higher
 - ncurses library
@@ -30,8 +27,6 @@ To execute the game just run
 ./rpg
 ```
 
----
-
 ## Project Overview
 
 This RPG allows the player to:
@@ -42,9 +37,7 @@ This RPG allows the player to:
 - Experience permadeath: characters that die remain dead until reset.
 - Reset levels and characters from the options menu.
 
----
-
-## Features and Innovations
+## Features and personal innovations
 
 ### Core Features:
 - Abstract base class `Character` and polymorphic classes `Warrior`, `Archer`, `Mage`, and `Enemy`.
@@ -59,7 +52,6 @@ This RPG allows the player to:
 - **Multiple Character Slots:** Players can create and reuse up to 5 characters.
 - **Reset System:** Resets either all levels or all characters from the options menu.
 
----
 
 ## File Structure
 
